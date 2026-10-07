@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial;
+            background:white;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        /* Modal styling */
+        .modal {
+            display: flex; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            overflow: auto;
+            background-color: rgba(0,0,0,0.7); 
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 15% auto; 
+            padding: 20px;
+            border-radius: 10px;
+            width: 300px;
+            text-align: center;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button.submit-btn {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button.submit-btn:hover {
+            background: #45a049;
+        }
+
+ </style>
+</head>
+<body>
+<!-- The Modal -->
+<div id="SignUpModal" class="modal">
+  <div class="modal-content">
+    <h2>Login:</h2>
+        <input type="text" id="username" name="username" placeholder="Username" required>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+        <button type="button" class="submit-btn" onclick="login()">Login</button><br></br>
+        <p>didn't have an account yet? <a href="/signup">SignUp</a> </p>
+  </div>
+</div>
+
+<script>
+async function login() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    const response = await fetch("/Login", {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json"
+    },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    });
+    try{
+    const data = await response.json();
+   if(data.users["username"] === data.username && data.users["passwords"] === data.password){
+       window.location.href = "/dashboard";
+    }
+    console.log(data);
+    }catch (error) {
+        console.error("Error:", error);
+        alert("Invalid username or password!");
+    }
+}
+</script>
+</body>
+</html>

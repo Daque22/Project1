@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>REST API Demo</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<h1>Your Inventory Products</h1>
+
+<ul id="productList"></ul>
+
+<!-- modal Section -->
+<div id="productModal" class="modal">
+    <div class="modalContent">
+
+            <h2>Update Product</h2>
+
+            <input type="hidden" id="updateId">
+
+            <label>Product Name:</label>
+            <input id="updateName">
+
+            <br><br>
+
+            <label>Price:</label>
+            <input id="updatePrice" type="number">
+
+            <br><br>
+
+            <button onclick="saveUpdate()">
+        Save Update
+           </button>
+
+        <button onclick="cancelUpdate()">
+        Cancel
+    </button>
+ </div>
+</div>
+
+<div id="adding_products">
+<h2>Add Product</h2>
+
+<input id="name" placeholder="Product name">
+<input id="price" type="number" placeholder="Price">
+
+<button onclick="addProduct()">Add</button>
+</div>
+
+<script>
+//GET - kuha tanan products
+async function getProducts() {
+
+    const response = await fetch("/api/products");
+
+    const products = await response.json();
+
+    const list = document.getElementById("productList");
+
+    list.innerHTML = "";
+
+    products.forEach(product => {
+
+        const item = document.createElement("li");
+
+        item.innerHTML =
+            `${product.p_id} - ${product.p_name} - ₱${product.price}
+             <br></br>
+             <button onclick="deleteProduct(${product.p_id})">
+             Delete
+             </button>
+             <button onclick="showUpdateForm(
+                ${product.p_id},
+                '${product.p_name}',
+                ${product.price}
+            )">
+                Update
+            </button>`;
+
+        list.appendChild(item);
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+getProducts();
+
+});//para ingnon display directly ang products sa frontend...
+//PUT - update product
+const modal = document.getElementById("productModal");
+function showUpdateForm(id, name, price) {
+    modal.style.display = "flex";
+
+ //   document.getElementById("updateForm").style.display = "block";
+
+    document.getElementById("updateId").value = id;
+
+    document.getElementById("updateName").value = name;
+
+    document.getElementById("updatePrice").value = price;
+}
+
+async function saveUpdate() {
+
+    const id = document.getElementById("updateId").value;
+
+    const name = document.getElementById("updateName").value;
+
+    const price = document.getElementById("updatePrice").value;
+
+
+    const response = await fetch(`/api/products/${id}`, {
+
+        method: "PUT",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            name: name,
+            price: Number(price)
+        })
+    });
+
+
+    const updatedProduct = await response.json();
+
+    console.log("Updated:", updatedProduct);
+
+
+    // Hide modal
+     modal.style.display = "none";
+
+    // Refresh products
+    getProducts();
+}
+
+
+// ============================
+// CANCEL
+// ============================
+
+function cancelUpdate() {
+     modal.style.display = "none";
+    
+}
+
+//POST - add product
+async function addProduct() {
+
+    const name = document.getElementById("name").value;
+    const price = document.getElementById("price").value;
+
+    const response = await fetch("/api/products", {
+
+        method: "POST",
+
+        headers: {
+            "Content-Type": "application/json"
+        },
+
+        body: JSON.stringify({
+            name: name,
+            price: Number(price)
+        })
+    });
+
+    const product = await response.json();
+
+    console.log("Added:", product);
+
+    getProducts();
+}
+
+
+//DELETE - delete product
+async function deleteProduct(id) {
+
+    const response = await fetch(`/api/products/${id}`, {
+
+        method: "DELETE"
+
+    });
+
+    const result = await response.json();
+
+    console.log(result);
+    getProducts();
+}
+
+</script>
+</body>
+</html>
